@@ -21,5 +21,10 @@ int get_brr_prediction(u8 filter, pcm_t p1, pcm_t p2);
 void decodeBRR(pcm_t *out);
 
 void apply_gauss_filter(pcm_t *buffer, size_t length);
+
+void ADPCMBlockMash(const pcm_t PCM_data[16], bool is_loop_point, bool is_end_point);
+
+pcm_t *resample(pcm_t *samples, int samples_length, int out_length, char type);
+
 #undef SKIP_SAFE_MALLOC
 #endif

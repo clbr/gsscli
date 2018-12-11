@@ -177,7 +177,7 @@ void ADPCMBlockMash(const pcm_t PCM_data[16], bool is_loop_point, bool is_end_po
 	FIRstats[kmin]++;
 }
 
-static pcm_t *resample(pcm_t *samples, int samples_length, int out_length, char type)
+pcm_t *resample(pcm_t *samples, int samples_length, int out_length, char type)
 {
 	double ratio = (double)samples_length / (double)out_length;
 	pcm_t *out = (short*)safe_malloc(2 * out_length);

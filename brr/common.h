@@ -15,7 +15,7 @@ void *safe_malloc(const size_t s)
 	return p;
 }
 #else  */
-void *safe_malloc(const size_t s) { return malloc(s); }
+#define safe_malloc(s) malloc(s)
 /*#endif */
 
 #define PI 3.14159265
