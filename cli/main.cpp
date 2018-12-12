@@ -18,60 +18,60 @@
 
 #include "structs.h"
 
-bool MusicActive;
+static bool MusicActive;
 
-char *gss_text;
-int gss_ptr;
-int gss_size;
+static char *gss_text;
+static int gss_ptr;
+static int gss_size;
 
-int SongCur;
-int RowCur;
-int RowView;
-int ColCur;
-int ColCurPrev;
-int OctaveCur;
+static int SongCur;
+static int RowCur;
+static int RowView;
+static int ColCur;
+static int ColCurPrev;
+static int OctaveCur;
 
-unsigned char *BRRTemp;
-int BRRTempAllocSize;
-int BRRTempSize;
-int BRRTempLoop;
+static unsigned char *BRRTemp;
+static int BRRTempAllocSize;
+static int BRRTempSize;
+static int BRRTempLoop;
 
-bool ChannelMute[8];
+static bool ChannelMute[8];
 
-unsigned char SPCMem[65536];
-unsigned char SPCTemp[66048];
-unsigned char SPCChnMem[65536];
-unsigned char SPCChnPack[65536];
+static unsigned char SPCMem[65536];
+static unsigned char SPCTemp[66048];
+static unsigned char SPCChnMem[65536];
+static unsigned char SPCChnPack[65536];
 
-unsigned char CompressSeqBuf[256];
-int CompressSrcPtr;
-int CompressSeqPtr;
-int CompressOutPtr;
+static unsigned char CompressSeqBuf[256];
+static int CompressSrcPtr;
+static int CompressSeqPtr;
+static int CompressOutPtr;
 
-int SPCInstrumentsSize;
-int SPCMusicSize;
-int SPCEffectsSize;
-int SPCMemTopAddr;
-int SPCMusicLargestSize;
+static int SPCInstrumentsSize;
+static int SPCMusicSize;
+static int SPCEffectsSize;
+static int SPCMemTopAddr;
+static int SPCMusicLargestSize;
 
-instrumentStruct insList[MAX_INSTRUMENTS];
-int InstrumentRenumberList[MAX_INSTRUMENTS];
-int InstrumentsCount;
+static instrumentStruct insList[MAX_INSTRUMENTS];
+static int InstrumentRenumberList[MAX_INSTRUMENTS];
+static int InstrumentsCount;
 
-bool UpdateSampleData;
+static bool UpdateSampleData;
 
-songStruct songList[MAX_SONGS];
-songStruct tempSong;
+static songStruct songList[MAX_SONGS];
+static songStruct tempSong;
 
-void SongDataClear(int song);
-void SongClear(int song);
-void SPCStop(void);
-void SongCleanUp(songStruct *s);
-bool SongIsEmpty(songStruct *s);
-int SongFindLastRow(songStruct *s);
+static void SongDataClear(int song);
+static void SongClear(int song);
+static void SPCStop(void);
+static void SongCleanUp(songStruct *s);
+static bool SongIsEmpty(songStruct *s);
+static int SongFindLastRow(songStruct *s);
 
 
-void gss_init(char *text,int size)
+static void gss_init(char *text,int size)
 {
 	gss_text=text;
 	gss_size=size;
@@ -80,7 +80,7 @@ void gss_init(char *text,int size)
 
 
 
-int gss_find_tag(const char *tag)
+static int gss_find_tag(const char *tag)
 {
 	char* text;
 	int len,size;
@@ -106,7 +106,7 @@ int gss_find_tag(const char *tag)
 
 
 
-const char *gss_load_str(const char *tag)
+static const char *gss_load_str(const char *tag)
 {
 	static char str[1024];
 	char c,*text;
@@ -153,7 +153,7 @@ const char *gss_load_str(const char *tag)
 
 
 
-int gss_load_int(const char *tag)
+static int gss_load_int(const char *tag)
 {
 	char c,*text;
 	int len,n,size,sign;
@@ -205,7 +205,7 @@ int gss_load_int(const char *tag)
 
 
 
-int gss_hex_to_byte(char n)
+static int gss_hex_to_byte(char n)
 {
 	if(n>='0'&&n<='9') return n-'0';
 	if(n>='a'&&n<='f') return n-'a'+10;
@@ -216,7 +216,7 @@ int gss_hex_to_byte(char n)
 
 
 
-short* gss_load_short_data(const char *tag)
+static short* gss_load_short_data(const char *tag)
 {
 	unsigned short *data,n;
 	char *text;
@@ -279,7 +279,7 @@ short* gss_load_short_data(const char *tag)
 
 
 
-int gss_parse_num_len(char* text,int len,int def)
+static int gss_parse_num_len(char* text,int len,int def)
 {
 	int c,num;
 
@@ -301,12 +301,12 @@ int gss_parse_num_len(char* text,int len,int def)
 	return num;
 }
 
-float get_volume_scale(int vol)
+static float get_volume_scale(int vol)
 {
 	if(vol<128) return 1.0f+(float)(vol-128)/128.0f; else return 1.0f+(float)(vol-128)/64.0f;
 }
 
-void InstrumentDataParse(int id,int ins)
+static void InstrumentDataParse(int id,int ins)
 {
 	char buf[64];
 	char insname[64];
@@ -365,7 +365,7 @@ void InstrumentDataParse(int id,int ins)
 	insList[ins].source=gss_load_short_data(buf);
 }
 
-void BRREncode(int ins)
+static void BRREncode(int ins)
 {
 	const char resample_list[]="nlcsb";
 	int i,smp,ptr,off,blocks,src_length,new_length,sum;
@@ -656,7 +656,7 @@ void BRREncode(int ins)
 	if(sum&&BRRTempLoop>=0) ++BRRTempLoop;
 }
 
-char* MakeNameForAlias(const char *name)
+static char* MakeNameForAlias(const char *name)
 {
 	static char alias[1024];
 	int i,c;
@@ -676,7 +676,7 @@ char* MakeNameForAlias(const char *name)
 	return alias;
 }
 
-int SamplesCompile(int adr,int one_sample)
+static int SamplesCompile(int adr,int one_sample)
 {
 	int i,ins,size,dir_ptr,adsr_ptr,sample_adr,sample_loop,prev,match;
 
@@ -784,7 +784,7 @@ int SamplesCompile(int adr,int one_sample)
 	return size;
 }
 
-void ChannelCompressFlush(int compile_adr)
+static void ChannelCompressFlush(int compile_adr)
 {
 	int i,ref_len,ref_off;
 
@@ -819,7 +819,7 @@ void ChannelCompressFlush(int compile_adr)
 	}
 }
 
-int DelayCompile(int adr,int delay)
+static int DelayCompile(int adr,int delay)
 {
 	const int max_short_wait=148;//max duration of the one-byte delay
 
@@ -864,7 +864,7 @@ int DelayCompile(int adr,int delay)
 	return adr;
 }
 
-int ChannelCompress(int compile_adr,int &play_adr,int loop_adr,int src_size,int ref_max)
+static int ChannelCompress(int compile_adr,int &play_adr,int loop_adr,int src_size,int ref_max)
 {
 	int i,tag,len,src_ptr,new_loop_adr,new_play_adr;
 
@@ -935,7 +935,7 @@ int ChannelCompress(int compile_adr,int &play_adr,int loop_adr,int src_size,int 
 	return CompressOutPtr;//compressed data size
 }
 
-int ChannelCompile(songStruct *s,int chn,int start_row,int compile_adr,int &play_adr)
+static int ChannelCompile(songStruct *s,int chn,int start_row,int compile_adr,int &play_adr)
 {
 	const int keyoff_gap_duration=2;//number of frames between keyoff and keyon, to prevent clicks
 	noteFieldStruct *n;
@@ -1201,7 +1201,7 @@ int ChannelCompile(songStruct *s,int chn,int start_row,int compile_adr,int &play
 	return size;
 }
 
-void InstrumentClear(int ins)
+static void InstrumentClear(int ins)
 {
 	if(insList[ins].source) free(insList[ins].source);
 
@@ -1234,7 +1234,7 @@ void InstrumentClear(int ins)
 	insList[ins].name="none";
 }
 
-bool SongIsChannelEmpty(songStruct *s,int chn)
+static bool SongIsChannelEmpty(songStruct *s,int chn)
 {
 	int row;
 
@@ -1243,7 +1243,7 @@ bool SongIsChannelEmpty(songStruct *s,int chn)
 	return true;
 }
 
-int SongCompile(songStruct *s_original,int start_row,int start_adr,bool mute)
+static int SongCompile(songStruct *s_original,int start_row,int start_adr,bool mute)
 {
 	static songStruct s;
 	noteFieldStruct *n,*m;
@@ -1399,7 +1399,7 @@ int SongCompile(songStruct *s_original,int start_row,int start_adr,bool mute)
 	return s_original->compiled_size;
 }
 
-bool SongIsRowEmpty(songStruct *s,int row,bool marker)
+static bool SongIsRowEmpty(songStruct *s,int row,bool marker)
 {
 	noteFieldStruct *n;
 	int sum,chn;
@@ -1422,7 +1422,7 @@ bool SongIsRowEmpty(songStruct *s,int row,bool marker)
 	return sum?false:true;
 }
 
-bool SongIsEmpty(songStruct *s)
+static bool SongIsEmpty(songStruct *s)
 {
 	int row;
 
@@ -1432,7 +1432,7 @@ bool SongIsEmpty(songStruct *s)
 }
 
 
-int EffectsCompile(int start_adr)
+static int EffectsCompile(int start_adr)
 {
 	int adr,song,size,effects_all,effects_off;
 
@@ -1469,7 +1469,7 @@ int EffectsCompile(int start_adr)
 
 
 
-bool SPCCompile(songStruct *s,int start_row,bool mute,bool effects,int one_sample)
+static bool SPCCompile(songStruct *s,int start_row,bool mute,bool effects,int one_sample)
 {
 	const int header_size=2;
 	int code_adr,sample_adr,adsr_adr,music_adr,effects_adr;
@@ -1575,7 +1575,7 @@ bool SPCCompile(songStruct *s,int start_row,bool mute,bool effects,int one_sampl
 
 }
 
-int SongFindLastRow(songStruct *s)
+static int SongFindLastRow(songStruct *s)
 {
 	int row;
 
@@ -1589,7 +1589,7 @@ int SongFindLastRow(songStruct *s)
 
 
 
-void SongCleanUp(songStruct *s)
+static void SongCleanUp(songStruct *s)
 {
 	noteFieldStruct *n;
 	int row,chn,song_length,prev_ins,prev_vol;
@@ -1629,7 +1629,7 @@ void SongCleanUp(songStruct *s)
 	}
 }
 
-bool ExportAll()
+static bool ExportAll()
 {
 	unsigned char header[2];
 	FILE *file;
@@ -1915,14 +1915,14 @@ bool ExportAll()
 	return true;
 }
 
-void SPCStop(void)
+static void SPCStop(void)
 {
 	MusicActive=false;
 
 	//while(1) if(!WSTREAMER.render) break;
 }
 
-void CompileAllSongs(void)
+static void CompileAllSongs(void)
 {
 	int song;
 
@@ -1938,7 +1938,7 @@ void CompileAllSongs(void)
 	}
 }
 
-void ModuleClear(void)
+static void ModuleClear(void)
 {
 	int i;
 
@@ -1960,7 +1960,7 @@ void ModuleClear(void)
 
 
 
-void SongDataClear(int song)
+static void SongDataClear(int song)
 {
 	int row,chn;
 
@@ -1984,7 +1984,7 @@ void SongDataClear(int song)
 
 
 
-void SongClear(int song)
+static void SongClear(int song)
 {
 	SongDataClear(song);
 
@@ -2007,7 +2007,7 @@ void SongClear(int song)
 	//UpdateInfo(false);
 }
 
-bool ModuleOpenFile(const char * filename) {
+static bool ModuleOpenFile(const char * filename) {
 
 	FILE *file;
 	char *text;
@@ -2196,7 +2196,7 @@ bool ModuleOpenFile(const char * filename) {
 
 
 
-void UpdateAll(void)
+static void UpdateAll(void)
 {
 	//InsListUpdate();
 	//InsUpdateControls();
@@ -2208,7 +2208,7 @@ void UpdateAll(void)
 
 
 
-void ModuleOpen(const char *filename)
+static void ModuleOpen(const char *filename)
 {
 	if(ModuleOpenFile(filename))
 	{
