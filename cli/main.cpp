@@ -24,9 +24,7 @@ static char *gss_text;
 static int gss_ptr;
 static int gss_size;
 
-static int SongCur;
 static int RowCur;
-static int RowView;
 static int ColCur;
 static int ColCurPrev;
 static int OctaveCur;
@@ -44,7 +42,6 @@ static unsigned char SPCChnMem[65536];
 static unsigned char SPCChnPack[65536];
 
 static unsigned char CompressSeqBuf[256];
-static int CompressSrcPtr;
 static int CompressSeqPtr;
 static int CompressOutPtr;
 
