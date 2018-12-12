@@ -1,0 +1,9 @@
+GSS
+===
+
+This is Shiru's GSS 1.42, with the SPC code edited to fix a hang,
+and a portable command-line exporter that can be used on non-Windows
+platforms.
+
+However, even with the previous SPC code, the cli exporter's output
+differs from the Windows exporter's. There's probably bugs somewhere.
