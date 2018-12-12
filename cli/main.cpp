@@ -135,7 +135,7 @@ static const char *gss_load_str(const char *tag)
 
 			str[ptr]=0;
 
-			return str;
+			return strdup(str);
 		}
 
 		++gss_ptr;
